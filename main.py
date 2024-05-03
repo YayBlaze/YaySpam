@@ -29,7 +29,7 @@ async def spam(start_time, interation):
     print('Function success')
     await interation.response.send_message("The spamming has commenced...")
     while toggle_spam == True:
-        print('Loop Run\n','start time:',start_time,'\ncurrent time:',time.time())
+        print('Loop Run\nstart time:',start_time,'\ncurrent time:',time.time())
         duration_secconds = time.time() - start_time
         msg = 'Minute '+str(round(duration_secconds//60))+' of waiting for '+spam_msg
         print('message:',msg,'\nwaiting secconds:',duration_secconds,'\nwaiting mins:',round(duration_secconds//60),'\n---------------------------------')
