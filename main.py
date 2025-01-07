@@ -53,8 +53,9 @@ class Spam:
         self.type = type
     def set_count_toggle(self, state):
         self.countToggle = state
-Victims = [Spam() for i in range(100)]
+Victims = [Spam() for i in range(10)]
 
+# OLD
 # async def spam(interation):
 #     print('Function sucess \nVictims:', ", ".join([i.user.display_name for i in Victims if i.user != None]))
 #     await interation.response.send_message("The spamming has commenced...")
@@ -73,7 +74,7 @@ Victims = [Spam() for i in range(100)]
 #         time.sleep(Victims[0].delay)
 
 async def spam(interation):
-    print('Function sucess \nVictims:', ", ".join([i.user.user for i in Victims if i.user != None]))
+    print('Function sucess \nVictims:', ", ".join([i.user.display_name for i in Victims if i.user != None]))
     await interation.response.send_message("The spamming has commenced...")
     await loop(interation)
     
@@ -164,7 +165,7 @@ async def stop_spam(interation, index: int):
         i = Victims[index]
         if i.toggle:
             i.toggle_spam()
-            await interation.response.send_message(content=f"Stopped Spamming {i.user.user}.")
+            await interation.response.send_message(content=f"Stopped Spamming {i.user.display_name}.")
         else: await interation.response.send_message(content='This is not a valid index', ephemeral=True)
     else: await interation.response.send_message(content="You don't have the perms to do that (L)", ephemeral=True)
 
