@@ -11,7 +11,6 @@ import aiohttp
 
 load_dotenv()
 TOKEN: Final[str] = os.getenv("DISCORD_TOKEN")
-SERVER_ID: Final[str] = os.getenv("GUILD_ID")
 
 #intents
 
@@ -122,7 +121,7 @@ async def image_loop(interation):
 #run bot
 @client.event
 async def on_ready() -> None:
-    await tree.sync(guild=discord.Object(id=f"{SERVER_ID}"))
+    await tree.sync(guild=None)
     await client.change_presence(activity=discord.Activity(name="spam", type=1, ))
     print(f'{client.user} is now running')
 #handle incoming messages
@@ -141,7 +140,6 @@ async def on_message(message: Message) -> None:
 @tree.command(
         name="spam",
         description="Spams a user | usable by yayblaze only",
-        guild=discord.Object(id=f'{SERVER_ID}')
 )
 async def spam_cmnd(interation, user:discord.Member, message: str, delay: int, wait: bool, count: bool, type: int):
     if interation.user.id == 749431660168216650:
@@ -165,7 +163,6 @@ async def spam_cmnd(interation, user:discord.Member, message: str, delay: int, w
 @tree.command(
     name="spam-image",
     description="Like spam command but with an image url | usable by yayblaze only",
-    guild=discord.Object(id=f'{SERVER_ID}')
 )
 async def image_cmd(interation, user:discord.Member, url: str, delay: int):
     if interation.user.id != 749431660168216650: return await interation.response.send_message(content="You don't have the perms to do that (L)", ephemeral=True)
@@ -182,7 +179,6 @@ async def image_cmd(interation, user:discord.Member, url: str, delay: int):
 @tree.command(
         name="info",
         description="Gives info on the bot",
-        guild=discord.Object(id=f'{SERVER_ID}')
 )
 async def info(interation):
     print(time.time(),": Info Command Run")
@@ -195,7 +191,6 @@ async def info(interation):
 @tree.command(
         name='stop_spam',
         description='Stops the given spamming | usable by yayblaze only',
-        guild=discord.Object(id=f'{SERVER_ID}')
 )
 async def stop_spam(interation, index: int, type: int):
     print(time.time(),": Stop Spam command has been run with index ",index)
