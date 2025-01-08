@@ -6,6 +6,8 @@ from discord import Intents, Client, Message
 from discord import app_commands
 from datetime import datetime
 import time
+import io
+import aiohttp
 
 load_dotenv()
 TOKEN: Final[str] = os.getenv("DISCORD_TOKEN")
@@ -53,6 +55,23 @@ class Spam:
         self.type = type
     def set_count_toggle(self, state):
         self.countToggle = state
+
+class ImageSpam:
+    def __init__(self):
+        self.user = None
+        self.url = None
+        self.delay = None
+        self.toggle = False
+    def setUser(self,  user):
+        self.user = user
+    def setURL(self, url):
+        self.url = url
+    def setDelay(self, delay):
+        self.dealy = delay
+    def setToggle(self, toggle):
+        self.toggle = toggle
+
+ImageVictims = [ImageSpam() for i in range (10)]
 Victims = [Spam() for i in range(10)]
 
 # OLD
@@ -100,6 +119,24 @@ async def loop(interation):
     time.sleep(Victims[0].delay)
     await loop(interation)
 
+async def image_spam(interation):
+    print('Function sucess \nImage Victims:', ", ".join([i.user.display_name for i in ImageVictims if i.user != None]))
+    await interation.response.send_message("The spamming has commenced...")
+    await image_loop(interation)
+
+async def image_loop(interation):
+    for i in ImageVictims:
+        if i.toggle:
+            print("Spamming: ",i.user.display_name)
+            async with aiohttp.ClientSession() as session:
+                async with session.get(i.url) as resp:
+                    if resp.status != 200:
+                        return await interation.channel.send('Could not download file...')
+                    data = io.BytesIO(await resp.read())
+                    await interation.channel.send(content=f"<@{i.user.id}>",file=discord.File(data, 'cool_image.png'))
+    time.sleep(Victims[0].delay)
+    await image_loop(interation)
+            
 #run bot
 @client.event
 async def on_ready() -> None:
@@ -126,7 +163,7 @@ async def on_message(message: Message) -> None:
 )
 async def spam_cmnd(interation, user:discord.Member, message: str, delay: int, wait: bool, count: bool, type: int):
     if interation.user.id == 749431660168216650:
-        print('Spam Command success\nuser:',user,'\nmsg:',message,'\ndelay:',delay)
+        print(time.time,': Spam Command Run\nuser:',user,'\nmsg:',message,'\ndelay:',delay)
         for i in Victims:
             if not i.toggle:
                 i.set_user(user)
@@ -144,14 +181,32 @@ async def spam_cmnd(interation, user:discord.Member, message: str, delay: int, w
     else: await interation.response.send_message(content="You don't have the perms to do that (L)", ephemeral=True)
 
 @tree.command(
+    name="spam-image",
+    description="Like spam command but with an image url | usable by yayblaze only",
+    guild=discord.Object(id=f'{SERVER_ID}')
+)
+async def image_cmd(interation, user:discord.Member, url: str, delay: int):
+    if interation.user.id != 749431660168216650: return await interation.response.send_message(content="You don't have the perms to do that (L)", ephemeral=True)
+    print(time.time(),": Image Spam Command Run")
+    for i in ImageVictims:
+        if not i.toggle:
+            i.setToggle(True)
+            i.setUser(user)
+            i.setURL(url)
+            i.setDelay(delay)
+            break
+    await image_spam(interation)
+
+@tree.command(
         name="info",
         description="Gives info on the bot",
         guild=discord.Object(id=f'{SERVER_ID}')
 )
 async def info(interation):
-    print("Info Command Run")
+    print(time.time(),": Info Command Run")
     embed = discord.Embed(title="YaySpam", description="This is a discord bot I made for spamming my friends", colour=discord.Colour.yellow())
-    embed.add_field(name="Command",value="The /spam command, used to start the bot, can only be run by YayBlaze. If you really want to use it ask me.", inline=False)
+    embed.add_field(name="Command",value="The /spam command, used to start the bot, can only be run by YayBlaze. If you really want to use it ask me. I might make these docs usefull at some point but i'm the only one who can use it now so i'm not going to", inline=False)
+    embed.add_field(name="Use",value="If you want me to spam someone lmk I can spam anyone who you want as long as their in a discord I have admin perms in.", inline=False)
     await interation.response.send_message(embed=embed)
     
     
@@ -160,12 +215,15 @@ async def info(interation):
         description='Stops the given spamming | usable by yayblaze only',
         guild=discord.Object(id=f'{SERVER_ID}')
 )
-async def stop_spam(interation, index: int):
+async def stop_spam(interation, index: int, type: int):
+    print(time.time(),": Stop Spam command has been run with index ",index)
     if interation.user.id == 749431660168216650:
-        i = Victims[index]
+        if type == 0: i = Victims[index]
+        elif type == 1: i = ImageVictims[index]
+        else: return await interation.response.send_message(content="That's not a valid type.", ephemeral=True)
         if i.toggle:
             i.toggle_spam()
-            await interation.response.send_message(content=f"Stopped Spamming {i.user.display_name}.")
+            await interation.response.send_message(content=f"Stopped Spamming {i.user.display_name}.", ephmeral=True)
         else: await interation.response.send_message(content='This is not a valid index', ephemeral=True)
     else: await interation.response.send_message(content="You don't have the perms to do that (L)", ephemeral=True)
 
