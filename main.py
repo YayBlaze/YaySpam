@@ -74,24 +74,6 @@ class ImageSpam:
 ImageVictims = [ImageSpam() for i in range (10)]
 Victims = [Spam() for i in range(10)]
 
-# OLD
-# async def spam(interation):
-#     print('Function sucess \nVictims:', ", ".join([i.user.display_name for i in Victims if i.user != None]))
-#     await interation.response.send_message("The spamming has commenced...")
-#     toggles = []
-#     for i in Victims:
-#         toggles.append(i.toggle)
-#     while True in toggles:
-#         for i in Victims:
-#             if i.msg != None:
-#                 print('Loop Run\nstart time:',i.start,'\ncurrent time:',time.time())
-#                 duration_secconds = time.time() - i.start
-#                 msg = 'Minute '+str(round(duration_secconds//60))+' of waiting for '+i.msg
-#                 print('message:',msg,'\nwaiting secconds:',duration_secconds,'\nwaiting mins:',round(duration_secconds//60),'\n---------------------------------')
-#                 embed = discord.Embed(title=msg)
-#                 await i.user.send(embed=embed)
-#         time.sleep(Victims[0].delay)
-
 async def spam(interation):
     print('Function sucess \nVictims:', ", ".join([i.user.display_name for i in Victims if i.user != None]))
     await interation.response.send_message("The spamming has commenced...")
