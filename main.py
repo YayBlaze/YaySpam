@@ -250,13 +250,6 @@ async def nuke(interation, deletechannels: bool):
     print(time.asctime(time.localtime()),": Nuke Command Run")
     await start_nuke(interation, deletechannels)
  
-@tree.command(
-     name='r34',
-     description='do you really want to do this?'
- )
-async def r34(interation, prompt: str):
-     await interation.response.send_message(f'imagine {prompt} r34 and think about how good it would be. like 10+ years of experience good')
- 
 #main entry point
 def main() -> None:
     client.run(token=TOKEN)
